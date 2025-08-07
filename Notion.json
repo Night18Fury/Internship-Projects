@@ -1,0 +1,171 @@
+{
+  "name": "Notion",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e3f6265e-407d-4d15-9ae2-145c1da5df16",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c62f9a0b-f1cf-4a36-a155-6df0c15d6532",
+              "name": "topic",
+              "value": "large language model reasoning",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "95757db0-0ef6-4698-9b4b-87ee243a7282",
+      "name": "Define Topic"
+    },
+    {
+      "parameters": {
+        "url": "=http://export.arxiv.org/api/query?search_query=all:{{ $json.topic.replace(' ', '+') }}&sortBy=relevance&sortOrder=descending&max_results=5",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "8046bd6f-14f9-4b04-b8ed-8069188aff73",
+      "name": "Query ArXiv"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "8cab58aa-b8f3-4fe6-81c3-8c1b500d283e",
+      "name": "XML"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst item = $input.item;\n\nconst papers = item.json.feed.entry;\n\nreturn papers.map(paper => ({ json: paper }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        0
+      ],
+      "id": "e867dc8e-3b70-4640-8a95-544fbc2a2c0e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://adityadhingra.app.n8n.cloud/webhook-test/dba0f287-7be2-40b2-a8bb-30479f8a6604",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "6d32ff6f-8458-4187-b890-43a9d85f80b5",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Define Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Topic": {
+      "main": [
+        [
+          {
+            "node": "Query ArXiv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query ArXiv": {
+      "main": [
+        [
+          {
+            "node": "XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "202528e1-4398-4d24-9d97-76e172c260b9",
+  "meta": {
+    "instanceId": "2151ca8da22932333fd7eff93871cd7d26adfc79f51cad52036fd01680528bfa"
+  },
+  "id": "MMqr7JpIVYdWhuuB",
+  "tags": []
+}
